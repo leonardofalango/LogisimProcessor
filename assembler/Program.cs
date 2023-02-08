@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 List<string> labels = new List<string>();
 List<int> labelIndex = new List<int>();
+StaticMethods.labelCheck(labels, labelIndex, "code.asm");
 
 if (args.Length == 0)
 {
@@ -53,7 +54,6 @@ finally
 }
 
 
-
 string processLine(string line)
 {
     byte[] opCode = new byte[16];
@@ -71,26 +71,29 @@ string processLine(string line)
         
         if (counter == 1)
         {
-            StaticMethods.mov.arrCopy(opCode, 0);
+            StaticMethods.movconst.arrCopy(opCode, 0);
 
             byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
                 line.IndexOf(',') - 1 - line.IndexOf('$')));
             byte constant = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-            regA.toBin().arrCopy(opCode, 3);
-            constant.toBin().arrCopy(opCode, 7);   
+            regA.toBin().arrCopy(opCode, 4);
+            var debug = constant.toBin(8);
+            debug.arrCopy(opCode, 8);
+
+            Console.WriteLine();
         }
         
         else
         {
-            StaticMethods.movconst.arrCopy(opCode, 0);
+            StaticMethods.mov.arrCopy(opCode, 0);
 
             byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
                 line.IndexOf(',') - 1 - line.IndexOf('$')));
             byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-            regA.toBin().arrCopy(opCode, 7);
-            regB.toBin().arrCopy(opCode, 11); 
+            regA.toBin().arrCopy(opCode, 8);
+            regB.toBin().arrCopy(opCode, 12); 
         }
     }
     
@@ -103,8 +106,8 @@ string processLine(string line)
 
         byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-        regA.toBin().arrCopy(opCode, 7);
-        regB.toBin().arrCopy(opCode, 11); 
+        regA.toBin().arrCopy(opCode, 8);
+        regB.toBin().arrCopy(opCode, 12); 
     }
     
     else if (line.Contains("sub"))
@@ -116,11 +119,11 @@ string processLine(string line)
             
         byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-        regA.toBin().arrCopy(opCode, 7);
-        regB.toBin().arrCopy(opCode, 11); 
+        regA.toBin().arrCopy(opCode, 8);
+        regB.toBin().arrCopy(opCode, 12); 
     }
     
-    else if (line.Contains("Imul"))
+    else if (line.Contains("imul"))
     {
         StaticMethods.mul.arrCopy(opCode, 0);
 
@@ -129,8 +132,8 @@ string processLine(string line)
             
         byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-        regA.toBin().arrCopy(opCode, 7);
-        regB.toBin().arrCopy(opCode, 11); 
+        regA.toBin().arrCopy(opCode, 8);
+        regB.toBin().arrCopy(opCode, 12); 
     }
     
     else if (line.Contains("div"))
@@ -142,8 +145,8 @@ string processLine(string line)
             
         byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-        regA.toBin().arrCopy(opCode, 7);
-        regB.toBin().arrCopy(opCode, 11); 
+        regA.toBin().arrCopy(opCode, 8);
+        regB.toBin().arrCopy(opCode, 12); 
     }
     
     else if (line.Contains("lsh"))
@@ -155,8 +158,8 @@ string processLine(string line)
             
         byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-        regA.toBin().arrCopy(opCode, 7);
-        regB.toBin().arrCopy(opCode, 11); 
+        regA.toBin().arrCopy(opCode, 8);
+        regB.toBin().arrCopy(opCode, 12); 
     }
     
     else if (line.Contains("rsh"))
@@ -168,8 +171,8 @@ string processLine(string line)
             
         byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-        regA.toBin().arrCopy(opCode, 7);
-        regB.toBin().arrCopy(opCode, 11); 
+        regA.toBin().arrCopy(opCode, 8);
+        regB.toBin().arrCopy(opCode, 12); 
     }
 
     else if (line.Contains("je"))
@@ -180,7 +183,7 @@ string processLine(string line)
 
         labelIndex[labels.IndexOf(label)]
             .toBin(12)
-            .arrCopy(opCode, 3);
+            .arrCopy(opCode, 4);
     }
     
     else if (line.Contains("inc"))
@@ -189,7 +192,7 @@ string processLine(string line)
 
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1));
         
-        regA.toBin().arrCopy(opCode, 7);
+        regA.toBin().arrCopy(opCode, 8);
     }
     
     else if (line.Contains("cmp"))
@@ -204,8 +207,8 @@ string processLine(string line)
             
             byte constant = byte.Parse(line.Substring(line.IndexOf(',') + 1));
 
-            regA.toBin().arrCopy(opCode, 3);
-            constant.toBin().arrCopy(opCode, 7);
+            regA.toBin().arrCopy(opCode, 4);
+            constant.toBin().arrCopy(opCode, 8);
         }
 
         else
@@ -217,8 +220,8 @@ string processLine(string line)
             
             byte regB = byte.Parse(line.Substring((line.IndexOf('$', line.IndexOf('$') + 1) + 1)));
             
-            regA.toBin().arrCopy(opCode, 7);
-            regB.toBin().arrCopy(opCode, 11); 
+            regA.toBin().arrCopy(opCode, 8);
+            regB.toBin().arrCopy(opCode, 12); 
         }
     
     }
@@ -229,7 +232,7 @@ string processLine(string line)
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
                 line.Length - 1 - line.IndexOf('$')));
         
-        regA.toBin().arrCopy(opCode, 7);
+        regA.toBin().arrCopy(opCode, 8);
         
         opCode.complete();
     }
@@ -240,7 +243,7 @@ string processLine(string line)
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
                 line.Length - 1 - line.IndexOf('$')));
         
-        regA.toBin().arrCopy(opCode, 7);
+        regA.toBin().arrCopy(opCode, 8);
         
         opCode.complete();
     }
@@ -253,7 +256,7 @@ string processLine(string line)
 
         labelIndex[labels.IndexOf(label)]
             .toBin(12)
-            .arrCopy(opCode, 3);
+            .arrCopy(opCode, 4);
     }
     
     else if (line.Contains("nop"))
@@ -408,12 +411,12 @@ public static class StaticMethods
         0,0,0,1,0,0,0,1
     };
 
-    public static byte[] mov = new byte[]{
-        1,1,1,1
+    public static byte[] movconst = new byte[]{
+        0,0,1,1
     };
 
-    public static byte[] movconst = new byte[]{
-        0,0,0,1,0,1,1,1
+    public static byte[] mov = new byte[]{
+        0,0,0,1,0,0,0,0
     };
 
     public static byte[] je = new byte[]{
@@ -459,6 +462,7 @@ public static class StaticMethods
                 {
                     labels.Add(line.Substring(0, i));
                     labelIndexes.Add(lineIndex);
+                    lineIndex--;
                 }    
             }
 
