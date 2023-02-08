@@ -6,13 +6,12 @@ using System.Collections.Generic;
 
 List<string> labels = new List<string>();
 List<int> labelIndex = new List<int>();
-StaticMethods.labelCheck(labels, labelIndex, "code.asm");
 
-if (args.Length == 0)
-{
-    Console.WriteLine("Você precisa passar um parâmetro para o arquivo a ser montado.");
-    return;
-}
+// if (args.Length == 0)
+// {
+//     Console.WriteLine("Você precisa passar um parâmetro para o arquivo a ser montado.");
+//     return;
+// }
 
 var filePath = "code.asm";
 
@@ -23,6 +22,7 @@ if (!File.Exists(filePath))
 }
 StreamWriter writer = null;
 StreamReader reader = null;
+int lineIndex = 0;
 try
 {
     writer = new StreamWriter("memory");
@@ -40,11 +40,12 @@ try
             continue;    
         writer.Write(line);
         writer.Write(" ");
+        lineIndex++;
     }
 }
 catch (Exception ex)
 {
-    Console.WriteLine("O seguinte erro ocorreu durante o processo:");
+    Console.WriteLine($"O seguinte erro ocorreu durante o processo na linha {lineIndex}:");
     Console.WriteLine(ex.Message);
 }
 finally
@@ -86,14 +87,62 @@ string processLine(string line)
         
         else
         {
-            StaticMethods.mov.arrCopy(opCode, 0);
+            byte quantPointer = line.countChar('[');
+            if (quantPointer == 0)
+            {
+                StaticMethods.mov.arrCopy(opCode, 0);
 
-            byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
-                line.IndexOf(',') - 1 - line.IndexOf('$')));
-            byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
+                byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
+                    line.IndexOf(',') - 1 - line.IndexOf('$')));
+                int virg = line.IndexOf('$', line.IndexOf('$') + 1);
 
-            regA.toBin().arrCopy(opCode, 8);
-            regB.toBin().arrCopy(opCode, 12); 
+                    byte regB = byte.Parse(line.Substring(virg + 1));
+
+                regA.toBin().arrCopy(opCode, 8);
+                regB.toBin().arrCopy(opCode, 12); 
+            }
+
+            else
+            {
+                if (line.IndexOf('[') > line.IndexOf(','))
+                {
+                    line = line
+                        .Replace("[", "")
+                        .Replace("]", "");
+
+                    StaticMethods.movstore.arrCopy(opCode, 0);
+                    
+                    byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
+                        line.IndexOf(',') - 1 - line.IndexOf('$')));
+                    
+                    int virg = line.IndexOf('$', line.IndexOf('$') + 1);
+
+                    byte regB = byte.Parse(line.Substring(virg + 1));
+
+                    regA.toBin().arrCopy(opCode, 8);
+                    regB.toBin().arrCopy(opCode, 12);
+                }
+                
+                else
+                {
+                    line = line
+                        .Replace("[", "")
+                        .Replace("]", "");
+
+                    StaticMethods.movstore.arrCopy(opCode, 0);
+                    
+                    byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
+                        line.IndexOf(',') - 1 - line.IndexOf('$')));
+                    
+                    int virg = line.IndexOf('$', line.IndexOf('$') + 1);
+
+                    byte regB = byte.Parse(line.Substring(virg + 1));
+
+                    regA.toBin().arrCopy(opCode, 8);
+                    regB.toBin().arrCopy(opCode, 12);
+                }
+            }
+
         }
     }
     
@@ -104,7 +153,9 @@ string processLine(string line)
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
             line.IndexOf(',') - 1 - line.IndexOf('$')));
 
-        byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
+        int virg = line.IndexOf('$', line.IndexOf('$') + 1);
+
+                    byte regB = byte.Parse(line.Substring(virg + 1));
 
         regA.toBin().arrCopy(opCode, 8);
         regB.toBin().arrCopy(opCode, 12); 
@@ -117,7 +168,9 @@ string processLine(string line)
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
             line.IndexOf(',') - 1 - line.IndexOf('$')));
             
-        byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
+        int virg = line.IndexOf('$', line.IndexOf('$') + 1);
+
+                    byte regB = byte.Parse(line.Substring(virg + 1));
 
         regA.toBin().arrCopy(opCode, 8);
         regB.toBin().arrCopy(opCode, 12); 
@@ -130,7 +183,9 @@ string processLine(string line)
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
             line.IndexOf(',') - 1 - line.IndexOf('$')));
             
-        byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
+        int virg = line.IndexOf('$', line.IndexOf('$') + 1);
+
+                    byte regB = byte.Parse(line.Substring(virg + 1));
 
         regA.toBin().arrCopy(opCode, 8);
         regB.toBin().arrCopy(opCode, 12); 
@@ -143,7 +198,9 @@ string processLine(string line)
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
             line.IndexOf(',') - 1 - line.IndexOf('$')));
             
-        byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
+        int virg = line.IndexOf('$', line.IndexOf('$') + 1);
+
+        byte regB = byte.Parse(line.Substring(virg + 1));
 
         regA.toBin().arrCopy(opCode, 8);
         regB.toBin().arrCopy(opCode, 12); 
@@ -156,7 +213,9 @@ string processLine(string line)
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
             line.IndexOf(',') - 1 - line.IndexOf('$')));
             
-        byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
+        int virg = line.IndexOf('$', line.IndexOf('$') + 1);
+
+        byte regB = byte.Parse(line.Substring(virg + 1));
 
         regA.toBin().arrCopy(opCode, 8);
         regB.toBin().arrCopy(opCode, 12); 
@@ -169,7 +228,9 @@ string processLine(string line)
         byte regA = byte.Parse(line.Substring(line.IndexOf('$') + 1,
             line.IndexOf(',') - 1 - line.IndexOf('$')));
             
-        byte regB = byte.Parse(line.Substring(line.IndexOf(',') + 1));
+        int virg = line.IndexOf('$', line.IndexOf('$') + 1);
+
+                    byte regB = byte.Parse(line.Substring(virg + 1));
 
         regA.toBin().arrCopy(opCode, 8);
         regB.toBin().arrCopy(opCode, 12); 
@@ -419,6 +480,14 @@ public static class StaticMethods
         0,0,0,1,0,0,0,0
     };
 
+    public static byte[] movstore = new byte[]{
+        0,0,1,0,0,0,1,0
+    };
+
+    public static byte[] moveload = new byte[]{
+        0,0,1,0,0,0,0,1
+    };
+    
     public static byte[] je = new byte[]{
         1,0,0,1
     };
