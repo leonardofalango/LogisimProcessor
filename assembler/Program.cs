@@ -6,65 +6,60 @@ using System.Collections.Generic;
 
 List<string> labels = new List<string>();
 List<int> labelIndex = new List<int>();
-int lineIndex = 0;
 
-// if (args.Length == 0)
-// {
-//     Console.WriteLine("Você precisa passar um parâmetro para o arquivo a ser montado.");
-//     return;
-// }
+if (args.Length == 0)
+{
+    Console.WriteLine("Você precisa passar um parâmetro para o arquivo a ser montado.");
+    return;
+}
 
-// var filePath = args[0];
+var filePath = "code.asm";
 
-// if (!File.Exists(filePath))
-// {
-//     Console.WriteLine("O arquivo especifiado não existe.");
-//     return;
-// }
-// StreamWriter writer = null;
-// StreamReader reader = null;
-// try
-// {
-//     writer = new StreamWriter("memory");
-//     writer.WriteLine("v2.0 raw");
-//     reader = new StreamReader(filePath);
+if (!File.Exists(filePath))
+{
+    Console.WriteLine("O arquivo especifiado não existe.");
+    return;
+}
+StreamWriter writer = null;
+StreamReader reader = null;
+try
+{
+    writer = new StreamWriter("memory");
+    writer.WriteLine("v2.0 raw");
+    reader = new StreamReader(filePath);
 
-//     while (!reader.EndOfStream)
-//     {
-//         string line = reader.ReadLine();
-//         line = processLine(line);
-//         writer.Write(line);
-//         writer.Write(" ");
-//     }
-// }
-// catch (Exception ex)
-// {
-//     Console.WriteLine("O seguinte erro ocorreu durante o processo:");
-//     Console.WriteLine(ex.Message);
-// }
-// finally
-// {
-//     reader.Close();
-//     writer.Close();
-// }
+    StaticMethods.labelCheck(labels, labelIndex, filePath);
 
-string[] txt = new string[]{"    mov     $1, 255",
-    "loop: ",
-        "inc     $0",
-        "cmp     $0, $1",
-        "je      end",
-    "jump    loop",
-    "end:",
-        "jump    end",
-};
 
-foreach (var xisde in txt)
-    Console.WriteLine(processLine(xisde));
+    while (!reader.EndOfStream)
+    {
+        string line = reader.ReadLine();
+        line = processLine(line);
+        if (line == "label")
+            continue;    
+        writer.Write(line);
+        writer.Write(" ");
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine("O seguinte erro ocorreu durante o processo:");
+    Console.WriteLine(ex.Message);
+}
+finally
+{
+    reader.Close();
+    writer.Close();
+}
+
+
 
 string processLine(string line)
 {
     byte[] opCode = new byte[16];
 
+    line = line.Replace("  ", " ");
+    line = line.Replace("  ", " ");
     line = line.Replace("  ", " ");
     line = line.Replace("  ", " ");
     line = line.Replace("  ", " ");
@@ -180,7 +175,12 @@ string processLine(string line)
     else if (line.Contains("je"))
     {
         StaticMethods.je.arrCopy(opCode, 0);
-        opCode = opCode.complete();
+
+        string label = line.Split(" ").Skip(1).ToArray()[1];
+
+        labelIndex[labels.IndexOf(label)]
+            .toBin(12)
+            .arrCopy(opCode, 3);
     }
     
     else if (line.Contains("inc"))
@@ -249,24 +249,17 @@ string processLine(string line)
     {
         StaticMethods.jump.arrCopy(opCode, 0);
         
-        string label = line.Split(" ")[1];
+        string label = line.Split(" ")[2];
 
-        labelIndex[labels.IndexOf(label + ":")]
+        labelIndex[labels.IndexOf(label)]
             .toBin(12)
             .arrCopy(opCode, 3);
     }
     
     else if (line.Contains("nop"))
         opCode = opCode.complete();
-        
-    else
-    {
-        opCode = opCode.complete();
-        labels.Add(line.Split(" ")[0]);
-        labelIndex.Add(lineIndex);;
-        return "";
-    }
-    lineIndex ++;
+    
+    else return "label";
     return toHex(opCode);
 }
 
@@ -451,5 +444,26 @@ public static class StaticMethods
         1,0,0,0
     };
 
+    public static void labelCheck(List<string> labels, List<int> labelIndexes, string filePath)
+    {
+        var reader = new StreamReader(filePath);
+        int lineIndex = 0;
+
+        while (!reader.EndOfStream)
+        {
+            string line = reader.ReadLine();
+            
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (line[i] == ':')
+                {
+                    labels.Add(line.Substring(0, i));
+                    labelIndexes.Add(lineIndex);
+                }    
+            }
+
+            lineIndex++;
+        }
+    }
 
 }
